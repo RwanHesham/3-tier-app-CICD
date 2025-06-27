@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: weathapp-weather-svc
+spec:
+  selector:
+    app.kubernetes.io/name: weatherapp-weather
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: http-get
+  type: ClusterIP

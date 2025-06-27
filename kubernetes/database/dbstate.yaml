@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sql-statefulset
+  labels:
+    app: sql
+spec:
+  selector:
+    matchLabels:
+      app: sql 
+  serviceName: db-service
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: sql 
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mysql-container
+        image: mysql:latest
+        ports:
+        - containerPort: 3306
+          name: database
+        env:
+        - name: MYSQL_ROOT_PASSWORD 
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: MYSQL_ROOT_PASSWORD
+
+        - name: MYSQL_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: auth-password
+
+        - name: MYSQL_PORT
+          value: "3306"
+
+        - name: MYSQL_HOST
+          value: "db-service"
+
+        - name: secret-key
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: secret-key
+        
+        volumeMounts:
+          - name: mysql-init
+            mountPath: /docker-entrypoint-initdb.d
+          - name: mysql-persistent-storage
+            mountPath: /var/lib/mysql 
+      volumes:
+      - name: mysql-init
+        configMap:
+          name: mysql-init-script
+          
+  volumeClaimTemplates:    
+  - metadata:
+      name: mysql-persistent-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: database-storage
+      resources:
+        requests:
+          storage: 10Gi

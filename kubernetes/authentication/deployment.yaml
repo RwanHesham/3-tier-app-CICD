@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: weatherapp-auth
+  labels:
+    app: nginx
 spec:
   replicas: 1
   selector:
@@ -13,27 +15,29 @@ spec:
         app.kubernetes.io/name: weatherapp-auth
     spec:
       containers:
-      - name: weatherapp-auth
-        image: afakharany/weatherapp-auth:lab
+      - name: weatherapp-auth-container
+        image: rawanhesham/auth:lab
         imagePullPolicy: IfNotPresent
         ports:
-          - containerPort: 8080
+        - containerPort: 8080
         env:
-          - name: DB_HOST
-            value: mysql
-          - name: DB_USER
-            value: authuser
-          - name: DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mysql-secret
-                key: auth-password
-          - name: DB_NAME
-            value: weatherapp
-          - name: DB_PORT
-            value: "3306"
-          - name: SECRET_KEY
-            valueFrom:
-              secretKeyRef:
-                name: mysql-secret
-                key: secret-key
+        - name: DB_HOST
+          value: db-service ### The Name of Service of The DB
+        - name: DB_USER
+          value: authuser
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: auth-password
+        - name: DB_NAME
+          value: weatherapp
+        
+        - name: DB_PORT
+          value: "3306"
+        
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: secret-key

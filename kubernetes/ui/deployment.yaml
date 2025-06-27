@@ -1,7 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: release-name-weatherapp-ui
+  name: weatherapp-ui
+  labels:
+    app: weatherapp-ui
 spec:
   replicas: 2
   selector:
@@ -13,27 +15,31 @@ spec:
         app.kubernetes.io/name: weatherapp-ui
     spec:
       containers:
-        - name: weatherapp-ui
-          image: "afakharany/weatherapp-ui:lab"
-          imagePullPolicy: IfNotPresent
-          env:
-          - name: AUTH_HOST
-            value: weatherapp-auth
-          - name: AUTH_PORT
-            value: "8080"
-          - name: WEATHER_HOST
-            value: weatherapp-weather
-          - name: WEATHER_PORT
-            value: "5000"
-          ports:
-            - name: http
-              containerPort: 3000
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: http
+      - name: weatherapp-ui-container
+        image: rawanhesham/ui:lab
+        env:
+        - name: AUTH_HOST
+          value: service-auth
+        - name: AUTH_PORT
+          value: "8080"
+        - name: WEATHER_HOST
+          value: weathapp-weather-svc 
+        - name: WEATHER_PORT
+          value: "5000"
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: secret-key
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+          name: ui-ports
+        livenessProbe:
+          httpGet:
+            path: / 
+            port: ui-ports
+        readinessProbe:
+          httpGet:
+            path: / 
+            port: ui-ports

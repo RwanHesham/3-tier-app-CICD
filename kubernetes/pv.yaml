@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: db-pv
+  labels:
+    kubernetes.io/hostname: minikube-m01
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes: 
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/db-pv
+  storageClassName: database-storage
